@@ -8,6 +8,7 @@ import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -40,6 +41,9 @@ public class GlobalExceptionHandler {
         }
         if(ex instanceof MethodArgumentNotValidException) {
             return this.handleMethodArgumentNotValidException((MethodArgumentNotValidException) ex);
+        }
+        if(ex instanceof HttpMessageNotReadableException) {
+            return this.handleHttpMessageNotReadableException((HttpMessageNotReadableException) ex);
         }
 
         return ResponseEntity
@@ -97,6 +101,13 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.BAD_REQUEST)
                 .body(new ExceptionResponseDTO(BAD_REQUEST, errorMessage.toString()));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ExceptionResponseDTO> handleHttpMessageNotReadableException(HttpMessageNotReadableException e) {
+        return ResponseEntity
+                .status(HttpStatus.BAD_REQUEST)
+                .body(new ExceptionResponseDTO(BAD_REQUEST, e.getMessage()));
     }
 
 }
